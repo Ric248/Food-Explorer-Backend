@@ -4,12 +4,15 @@
   "description": "Backend do desafio final do curso Explorer da Rocketseat.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./src/server.js"
   },
   "keywords": [],
   "author": "Ricardo Oliveira da Silva",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
