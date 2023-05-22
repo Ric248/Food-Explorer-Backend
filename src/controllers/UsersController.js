@@ -9,7 +9,7 @@ class UsersController {
     const { name, email, password } = request.body;
 
     const database = await sqliteConnection();
-    const checkUserExists = await database.get('SELECT * FROM users WHERE email = (?)', [email]); // XXX ALTERAR? XXX
+    const checkUserExists = await database.get('SELECT * FROM users WHERE email = (?)', [email]); // XXX KNEX? XXX
 
     if(checkUserExists) {
         throw new AppError("Este e-mail já está em uso!");
@@ -29,7 +29,7 @@ class UsersController {
 
     const hashedPassword = await hash(password, 8);
 
-    await database.run('INSERT INTO users (name, email, password ) VALUES (?, ?, ?)', [name, email, hashedPassword]); // XXX ALTERAR? XXX
+    await database.run('INSERT INTO users (name, email, password ) VALUES (?, ?, ?)', [name, email, hashedPassword]); // XXX KNEX? XXX
 
     return response.status(201).json();
   }
@@ -39,13 +39,13 @@ class UsersController {
     const user_id = request.user.id
 
     const database = await sqliteConnection();
-    const user = await database.get("SELECT * FROM users WHERE id = (?)", [user_id]); // XXX ALTERAR? XXX
+    const user = await database.get("SELECT * FROM users WHERE id = (?)", [user_id]); // XXX KNEX? XXX
 
     if (!user) {
         throw new AppError("Usuário não encontrado");
     }
 
-    const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)", [email]); // XXX ALTERAR? XXX
+    const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)", [email]); // XXX KNEX? XXX
 
     if(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
         throw new AppError("Este e-mail já está em uso");
@@ -76,7 +76,7 @@ class UsersController {
         updated_at = DATETIME("now")
         WHERE id = ?`,
         [user.name, user.email, user.password, user_id]
-    ); // XXX ALTERAR? XXX
+    ); // XXX KNEX? XXX
 
     return response.status(201).json();
   }
