@@ -13,19 +13,19 @@ app.use(routes);
 database();
 
 app.use((error, request, response, next) => {
-    // Client error
-    if(error instanceof AppError) {
-        return response.status(error.statusCode).json({
-            status: "error",
-            message: error.message
-        });
-    }
+  // Client error
+  if(error instanceof AppError) {
+    return response.status(error.statusCode).json({
+      status: "error",
+      message: error.message
+    });
+  }
 
-    // Server error
-    return response.status(500).json({
-        status: "error",
-        message: "Internal Server Error"
-    })
+  // Server error
+  return response.status(500).json({
+    status: "error",
+    message: "Internal Server Error"
+  })
 })
 
 const PORT = 3333;

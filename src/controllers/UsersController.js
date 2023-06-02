@@ -12,19 +12,19 @@ class UsersController {
     const checkUserExists = await database.get('SELECT * FROM users WHERE email = (?)', [email]); // XXX KNEX? XXX
 
     if(checkUserExists) {
-        throw new AppError("Este e-mail já está em uso!");
+      throw new AppError("Este e-mail já está em uso!");
     }
 
     if(name.length < 4) {
-        throw new AppError("Digite um nome válido!");
+      throw new AppError("Digite um nome válido!");
     }
 
     if(!email.includes("@", ".") || !email.includes(".")) {
-        throw new AppError("Digite um email válido!");
+      throw new AppError("Digite um email válido!");
     }
 
     if(password.length < 6) {
-        throw new AppError("Erro: A senha deve ter pelo menos 6 dígitos!");
+      throw new AppError("Erro: A senha deve ter pelo menos 6 dígitos!");
     }
 
     const hashedPassword = await hash(password, 8);
@@ -42,40 +42,40 @@ class UsersController {
     const user = await database.get("SELECT * FROM users WHERE id = (?)", [user_id]); // XXX KNEX? XXX
 
     if (!user) {
-        throw new AppError("Usuário não encontrado");
+      throw new AppError("Usuário não encontrado");
     }
 
     const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)", [email]); // XXX KNEX? XXX
 
     if(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
-        throw new AppError("Este e-mail já está em uso");
+      throw new AppError("Este e-mail já está em uso");
     }
 
     user.name = name;
     user.email = email;
 
     if (password && !old_password) {
-        throw new AppError("Você precisa informar a senha antiga");
+      throw new AppError("Você precisa informar a senha antiga");
     }
 
     if (password && old_password) {
         const checkOldPassword = await compare(old_password, user.password);
 
         if (!checkOldPassword) {
-            throw new AppError("A senha antiga não confere");
+          throw new AppError("A senha antiga não confere");
         }
 
         user.password = await hash(password, 8);
     }
 
     await database.run(`
-        UPDATE users SET
-        name = ?,
-        email = ?,
-        password = ?,
-        updated_at = DATETIME("now")
-        WHERE id = ?`,
-        [user.name, user.email, user.password, user_id]
+      UPDATE users SET
+      name = ?,
+      email = ?,
+      password = ?,
+      updated_at = DATETIME("now")
+      WHERE id = ?`,
+      [user.name, user.email, user.password, user_id]
     ); // XXX KNEX? XXX
 
     return response.status(201).json();
