@@ -8,10 +8,7 @@ class DishesController{
 
     const ingredients = await knex("ingredients").where({ dish_id: id }).orderBy("name");
 
-    return response.status(200).json({
-      ...dish,
-      ingredients
-    });
+    return response.status(200).json({ ...dish, ingredients });
   }
 
   async index(request, response){
@@ -45,12 +42,9 @@ class DishesController{
   const dishesWithIngredients = dishes.map(dish => {
     const dishIngredient = dishesIngredients.filter(ingredient => ingredient.dish_id === dish.id);
 
-    return {
-    ...dish,
-    ingredients: dishIngredient
-    }
+    return { ...dish, ingredients: dishIngredient }
   })
-  
+
   return response.status(200).json(dishesWithIngredients);
   }
 };

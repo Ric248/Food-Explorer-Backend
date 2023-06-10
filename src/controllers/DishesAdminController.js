@@ -2,28 +2,29 @@ const knex = require ('../database/knex');
 const AppError = require('../utils/AppError');
 const DiskStorage = require("../providers/DiskStorage")
 
-
 class DishesAdminController{
   async create(request, response) {
-    const {title, description, category, price, ingredients} = request.body;
+    const {title, description, category, price, ingredientString} = request.body;
+    const ingredients = ingredientString.split(",");
+
     const checkDishAlreadyExist = await knex("dishes").where({title}).first();
-  
+
     if(checkDishAlreadyExist){
       throw new AppError("Este prato já existe em nossa database")
     }
-    
+
     const dishFilename = request.file.filename;
     const diskStorage = new DiskStorage()
     const filename = await diskStorage.saveFile(dishFilename);
     
-    const dish_id = await knex("dishes").insert({ title, description, category, price, image: filename });
+    const [dish_id] = await knex("dishes").insert({ title, description, category, price, image: filename });
 
     const ingredientsInsert = ingredients.map(ingredient => {
       return{ name: ingredient, dish_id }
     });
-  
+
     await knex("ingredients").insert(ingredientsInsert)
-  
+
     return response.status(201).json()
   }
 
