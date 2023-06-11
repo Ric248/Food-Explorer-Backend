@@ -3,6 +3,53 @@ const AppError = require('../utils/AppError');
 const DiskStorage = require("../providers/DiskStorage")
 
 class DishesAdminController{
+  async show(request, response){
+    const { id } = request.params;
+
+    const dish = await knex("dishes").where({ id }).first();
+
+    const ingredients = await knex("ingredients").where({ dish_id: id }).orderBy("name");
+
+    return response.status(200).json({ ...dish, ingredients });
+  }
+
+  async index(request, response){
+    const { title, ingredients } = request.query;
+
+    let dishes
+
+    if(ingredients){
+      const filteredIngredients = ingredients.split(',').map(ingredient => ingredient.trim())
+
+      dishes = await knex("ingredients")
+      .select([
+        "dishes.id",
+        "dishes.title",
+        "dishes.price",
+        "dishes.category",
+        "dishes.image",
+        "dishes.price"
+      ])
+      .whereLike("dishes.title", `%${title}%`)
+      .whereIn("name", filteredIngredients)
+      .innerJoin("dishes", "dishes.id", "ingredients.dish_id")
+      .orderBy("dishes.title")
+
+    } else{
+    dishes = await knex("dishes")
+    .whereLike("title", `%${title}%`)   
+  }
+
+  const dishesIngredients = await knex("ingredients") 
+  const dishesWithIngredients = dishes.map(dish => {
+    const dishIngredient = dishesIngredients.filter(ingredient => ingredient.dish_id === dish.id);
+
+    return { ...dish, ingredients: dishIngredient }
+  })
+
+  return response.status(200).json(dishesWithIngredients);
+  }
+
   async create(request, response) {
     const {title, description, category, price, ingredientString} = request.body;
     const ingredients = ingredientString.split(",");
@@ -37,9 +84,11 @@ class DishesAdminController{
   }
 
   async update(request, response){
-    const { title, description, category, image, price, ingredients } = request.body;
+    console.log("Entrou no update");
+    const { title, description, category, image, price, ingredientString } = request.body;
+    const ingredients = ingredientString.split(",");
     const { id } = request.params;
-
+    console.log(id, title, description, category, image, price, ingredients); // -------------------------------------------------------------------
     const dish = await knex("dishes").where({ id }).first();
 
     if(!dish){
@@ -70,11 +119,10 @@ class DishesAdminController{
         name : ingredient
       }
       })
-      
+
       await knex("ingredients").where({ dish_id: id}).delete()
       await knex("ingredients").where({ dish_id: id}).insert(ingredientsInsert)
     }
-
 
     return response.status(202).json('Prato atualizado com sucesso')
   }

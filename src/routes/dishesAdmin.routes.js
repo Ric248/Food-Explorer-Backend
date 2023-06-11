@@ -12,10 +12,12 @@ const upload = multer(uploadConfig.MULTER)
 const dishesAdminController = new DishesAdminController();
 const dishImageController = new DishImageController()
 
+dishesAdminRoutes.get('/', dishesAdminController.index);
+dishesAdminRoutes.get('/:id', dishesAdminController.show);
+dishesAdminRoutes.delete('/:id', dishesAdminController.delete);
 dishesAdminRoutes.post('/', upload.single("image"), dishesAdminController.create);
-dishesAdminRoutes.delete('/:id', dishesAdminController.delete)
-dishesAdminRoutes.put('/:id', dishesAdminController.update)
+dishesAdminRoutes.put("/:id", upload.single("image"), dishesAdminController.update);
 
-dishesAdminRoutes.patch('/dishImage/:id', upload.single("image"), dishImageController.update)
+dishesAdminRoutes.patch('/dishImage/:id', upload.single("image"), dishImageController.update) // XXX excluir? XXX
 
 module.exports = dishesAdminRoutes;
