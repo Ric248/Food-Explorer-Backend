@@ -74,19 +74,25 @@ class DishesAdminController{
     return response.status(201).json()
   }
 
-  async update(request, response){
+  async update(request, response) {
     const { title, description, category, price, ingredientString } = request.body;
     const ingredients = ingredientString.split(",");
     const { id } = request.params;
     const dish = await knex("dishes").where({ id }).first();
+    const oldImage = dish.image;
 
     if(!dish){
       throw new AppError("O prato que você está tentando atualizar não existe")
     };
 
     const diskStorage = new DiskStorage();
-    const dishFilename = request.file.filename;
-    const filename = await diskStorage.saveFile(dishFilename);
+    const newImage = request.file.filename;
+
+    if(newImage) {
+      await diskStorage.deleteFile(oldImage);
+    }
+
+    const filename = await diskStorage.saveFile(newImage);
 
     dish.title = title ?? dish.title;
     dish.description = description ?? dish.description;
@@ -108,7 +114,11 @@ class DishesAdminController{
 
   async delete(request, response){
     const { id } = request.params;
+    const dish = await knex("dishes").where({ id }).first();
 
+    const diskStorage = new DiskStorage();
+
+    await diskStorage.deleteFile(dish.image);
     await knex("dishes").where({ id }).delete();
 
     return response.status(204).json();
