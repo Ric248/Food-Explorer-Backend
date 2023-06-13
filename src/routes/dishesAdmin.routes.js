@@ -18,6 +18,4 @@ dishesAdminRoutes.delete('/:id', dishesAdminController.delete);
 dishesAdminRoutes.post('/', upload.single("image"), dishesAdminController.create);
 dishesAdminRoutes.put("/:id", upload.single("image"), dishesAdminController.update);
 
-dishesAdminRoutes.patch('/dishImage/:id', upload.single("image"), dishImageController.update) // XXX excluir? XXX
-
 module.exports = dishesAdminRoutes;

@@ -43,7 +43,6 @@ class DishesAdminController{
   const dishesIngredients = await knex("ingredients") 
   const dishesWithIngredients = dishes.map(dish => {
     const dishIngredient = dishesIngredients.filter(ingredient => ingredient.dish_id === dish.id);
-
     return { ...dish, ingredients: dishIngredient }
   })
 
@@ -75,30 +74,24 @@ class DishesAdminController{
     return response.status(201).json()
   }
 
-  async delete(request, response){
-    const { id } = request.params;
-
-    await knex("dishes").where({ id }).delete();
-
-    return response.status(204).json();
-  }
-
   async update(request, response){
-    console.log("Entrou no update");
-    const { title, description, category, image, price, ingredientString } = request.body;
+    const { title, description, category, price, ingredientString } = request.body;
     const ingredients = ingredientString.split(",");
     const { id } = request.params;
-    console.log(id, title, description, category, image, price, ingredients); // -------------------------------------------------------------------
     const dish = await knex("dishes").where({ id }).first();
 
     if(!dish){
       throw new AppError("O prato que você está tentando atualizar não existe")
-    }
+    };
+
+    const diskStorage = new DiskStorage();
+    const dishFilename = request.file.filename;
+    const filename = await diskStorage.saveFile(dishFilename);
 
     dish.title = title ?? dish.title;
     dish.description = description ?? dish.description;
     dish.category = category ?? dish.category;
-    dish.image = image ?? dish.image;
+    dish.image = filename ?? dish.image;
     dish.price = price ?? dish.price;  
 
     await knex("dishes").where({ id }).update(dish)
@@ -107,11 +100,9 @@ class DishesAdminController{
     const hasOnlyOneIngredient = typeof(ingredients) === "string";
 
     let ingredientsInsert
+
     if (hasOnlyOneIngredient) {
-      ingredientsInsert = {
-      dish_id: dish.id,
-      name: ingredients
-      }
+      ingredientsInsert = { dish_id: dish.id, name: ingredients }
     } else if (ingredients.length > 1) {
       ingredientsInsert = ingredients.map(ingredient => {
       return {
@@ -125,6 +116,14 @@ class DishesAdminController{
     }
 
     return response.status(202).json('Prato atualizado com sucesso')
+  }
+
+  async delete(request, response){
+    const { id } = request.params;
+
+    await knex("dishes").where({ id }).delete();
+
+    return response.status(204).json();
   }
 }
 
