@@ -91,31 +91,19 @@ class DishesAdminController{
     dish.title = title ?? dish.title;
     dish.description = description ?? dish.description;
     dish.category = category ?? dish.category;
+    dish.price = price ?? dish.price;
     dish.image = filename ?? dish.image;
-    dish.price = price ?? dish.price;  
 
     await knex("dishes").where({ id }).update(dish)
-    await knex("dishes").where({ id }).update("updated_at", knex.fn.now())
 
-    const hasOnlyOneIngredient = typeof(ingredients) === "string";
+    const ingredientsInsert = ingredients.map(ingredient => {
+      return{ name: ingredient, dish_id: id };
+    });
 
-    let ingredientsInsert
+    await knex("ingredients").where({ dish_id: id}).delete();
+    await knex("ingredients").insert(ingredientsInsert);
 
-    if (hasOnlyOneIngredient) {
-      ingredientsInsert = { dish_id: dish.id, name: ingredients }
-    } else if (ingredients.length > 1) {
-      ingredientsInsert = ingredients.map(ingredient => {
-      return {
-        dish_id: dish.id,
-        name : ingredient
-      }
-      })
-
-      await knex("ingredients").where({ dish_id: id}).delete()
-      await knex("ingredients").where({ dish_id: id}).insert(ingredientsInsert)
-    }
-
-    return response.status(202).json('Prato atualizado com sucesso')
+    return response.status(202).json('Prato atualizado com sucesso');
   }
 
   async delete(request, response){
