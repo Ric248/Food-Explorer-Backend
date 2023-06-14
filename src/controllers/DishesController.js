@@ -2,7 +2,7 @@ const knex = require ('../database/knex');
 const AppError = require('../utils/AppError');
 const DiskStorage = require("../providers/DiskStorage")
 
-class DishesAdminController{
+class DishesController{
   async show(request, response){
     const { id } = request.params;
 
@@ -125,4 +125,4 @@ class DishesAdminController{
   }
 }
 
-module.exports = DishesAdminController;
+module.exports = DishesController;
