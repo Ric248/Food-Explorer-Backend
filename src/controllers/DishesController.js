@@ -16,17 +16,20 @@ class DishesController{
   async index(request, response){
     const { search } = request.query;
 
-    const searchTitle = await knex("dishes").whereLike("title", `%${search}%`)
-    const searchDishes = searchTitle.map(dish => {return { ...dish }})
+    const searchByTitle = await knex("dishes").whereLike("title", `%${search}%`);
+    const searchDishes = searchByTitle.map(dish => {return { ...dish }});
 
-    const listIngredients = await knex("ingredients").whereLike("name", `%${search}%`)
-    const dishIds = listIngredients.map(ingredient => ingredient.dish_id)
-    const dishes = await knex("dishes")
-    const searchIngredients = dishIds.map(dishId => dishes.filter(dish => dish.id === dishId))
+    const dishes = await knex("dishes");
+    const ingredientList = await knex("ingredients").whereLike("name", `%${search}%`);
+    const dishIds = ingredientList.map(ingredient => ingredient.dish_id);
+    const searchByIngredients = dishIds.map(dishId => dishes.filter(dish => dish.id === dishId));
 
-    const searchResult = searchDishes.concat(...searchIngredients)
+    if(searchDishes.length == 0) {
+      const searchResult = searchDishes.concat(...searchByIngredients);
+      return response.status(200).json(searchResult);
+    }
 
-    return response.status(200).json(searchResult);
+    return response.status(200).json(searchDishes);
   }
 
   async create(request, response) {
